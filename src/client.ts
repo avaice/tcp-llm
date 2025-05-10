@@ -1,9 +1,16 @@
 import * as net from "node:net";
 import * as readline from "node:readline";
+import { config } from "dotenv";
+
+// 環境変数の読み込み
+config();
 
 // 接続設定
-const PORT = Number.parseInt(process.env.PORT || "3000", 10);
-const HOST = process.env.HOST || "127.0.0.1";
+const PORT = Number.parseInt(
+  process.env.CLIENT_PORT || process.env.PORT || "3000",
+  10
+);
+const HOST = process.env.CLIENT_HOST || process.env.HOST || "127.0.0.1";
 
 // ソケット作成
 const client = new net.Socket();

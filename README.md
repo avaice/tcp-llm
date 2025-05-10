@@ -20,6 +20,8 @@ TCP/IP 通信を使って OpenAI API にアクセスできるサーバーです�
 
 ## セットアップ
 
+### 通常のセットアップ
+
 1. リポジトリをクローン
 
 ```bash
@@ -44,6 +46,40 @@ PORT=3000
 HOST=127.0.0.1
 ```
 
+### Docker を使用したセットアップ
+
+1. リポジトリをクローン
+
+```bash
+git clone https://github.com/yourusername/tcp-llm.git
+cd tcp-llm
+```
+
+2. `.env`ファイルを設定
+
+```
+# OpenAI API設定
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+3. Docker コンテナをビルドして起動
+
+```bash
+docker-compose up -d
+```
+
+これにより、サーバーがバックグラウンドで起動します。ログを確認するには：
+
+```bash
+docker-compose logs -f
+```
+
+4. コンテナを停止するには
+
+```bash
+docker-compose down
+```
+
 ## 使い方
 
 ### サーバーの起動
@@ -60,6 +96,8 @@ TCP/IPサーバーが起動しました - 127.0.0.1:3000
 
 ### クライアントの実行
 
+#### 通常のセットアップでのクライアント実行
+
 別のターミナルウィンドウで以下のコマンドを実行します：
 
 ```bash
@@ -71,6 +109,34 @@ npm run client
 ```
 サーバー(127.0.0.1:3000)に接続しました
 メッセージを入力してください（コマンド一覧は '/help'、終了するには 'exit'）:
+```
+
+#### Docker 使用時のクライアント実行
+
+Docker コンテナでサーバーを実行している場合、クライアントは以下のように実行します：
+
+1. 環境変数を設定してクライアントを実行
+
+```bash
+# Dockerホスト上でクライアントを実行する場合
+CLIENT_HOST=localhost npm run client
+
+# 別のマシンからクライアントを実行する場合
+CLIENT_HOST=<サーバーのIPアドレス> npm run client
+```
+
+または、`.env`ファイルに以下を追加して実行することもできます：
+
+```
+# クライアント設定
+CLIENT_HOST=localhost
+CLIENT_PORT=3000
+```
+
+その後、通常通りクライアントを実行します：
+
+```bash
+npm run client
 ```
 
 メッセージを入力して Enter キーを押すと、OpenAI API からの応答が表示されます。応答には使用されたモデル情報も含まれます：
@@ -106,11 +172,19 @@ npm run client
 
 ## カスタマイズ
 
+### 一般的なカスタマイズ
+
 - `.env`ファイルでポート番号やホスト名を変更できます
 - `src/index.ts`の`processMessage`関数で OpenAI API のパラメータを調整できます
 - `MAX_HISTORY`定数を変更して、保持する会話履歴の数を調整できます（デフォルトは 10）
 - `AVAILABLE_MODELS`配列を編集して、利用可能なモデルを追加・削除できます
 - 必要に応じて、メッセージのフォーマットやプロトコルをカスタマイズできます
+
+### Docker 関連のカスタマイズ
+
+- `docker-compose.yml`ファイルを編集して、ポートマッピングやボリュームマウントを変更できます
+- `Dockerfile`を編集して、ビルドプロセスをカスタマイズできます
+- 本番環境では、`docker-compose.prod.yml`を作成して、本番用の設定を追加することをお勧めします
 
 ## 注意事項
 

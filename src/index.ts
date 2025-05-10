@@ -8,7 +8,7 @@ config();
 
 // 環境変数からの設定取得
 const PORT = Number.parseInt(process.env.PORT || "3000", 10);
-const HOST = process.env.HOST || "127.0.0.1";
+const HOST = process.env.HOST || "0.0.0.0"; // Dockerコンテナ内では0.0.0.0にバインドして外部からアクセス可能にする
 const MAX_HISTORY = 10; // 保持する会話履歴の最大数
 
 // 利用可能なモデルの定義
