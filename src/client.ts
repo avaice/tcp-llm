@@ -1,6 +1,7 @@
 import * as net from "node:net";
 import * as readline from "node:readline";
 import { config } from "dotenv";
+import { XMLParser } from "fast-xml-parser";
 
 // 環境変数の読み込み
 config();
@@ -66,20 +67,44 @@ interface ResponseData {
   content: string;
 }
 
+// XMLパーサーの設定
+const xmlParser = new XMLParser({
+  ignoreAttributes: false,
+  parseAttributeValue: true,
+});
+
 // サーバーからのデータ受信
 client.on("data", (data) => {
   const responseText = data.toString().trim();
 
   try {
-    // JSONレスポンスの解析を試みる
-    const responseData = JSON.parse(responseText) as ResponseData;
+    // XMLレスポンスの解析を試みる
+    if (responseText.startsWith("<")) {
+      // XMLの場合
+      const parsedData = xmlParser.parse(responseText);
 
-    // モデル情報とレスポンス内容を表示
-    console.log("\n=== AIからの応答 ===");
-    console.log(`[モデル: ${responseData.model}]`);
-    console.log(responseData.content);
+      if (parsedData.response) {
+        const responseData = {
+          model: parsedData.response.model,
+          content: parsedData.response.content,
+        };
+
+        // モデル情報とレスポンス内容を表示
+        console.log("\n=== AIからの応答 ===");
+        console.log(`[モデル: ${responseData.model}]`);
+        console.log(responseData.content);
+      } else {
+        // 解析できたがresponseプロパティがない場合
+        console.log("\n=== サーバーからの応答 ===");
+        console.log(responseText);
+      }
+    } else {
+      // プレーンテキストの場合（コマンドレスポンスなど）
+      console.log("\n=== サーバーからの応答 ===");
+      console.log(responseText);
+    }
   } catch (error) {
-    // JSON解析に失敗した場合（コマンドレスポンスなど）は、そのまま表示
+    // XML解析に失敗した場合は、そのまま表示
     console.log("\n=== サーバーからの応答 ===");
     console.log(responseText);
   }

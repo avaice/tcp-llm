@@ -2,6 +2,7 @@ import * as net from "node:net";
 import { config } from "dotenv";
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { XMLBuilder } from "fast-xml-parser";
 
 // 環境変数の読み込み
 config();
@@ -111,6 +112,12 @@ interface ResponseData {
   model: string;
   content: string;
 }
+
+// XMLビルダーの設定
+const xmlBuilder = new XMLBuilder({
+  format: true,
+  ignoreAttributes: false,
+});
 
 // メッセージ処理関数
 async function processMessage(
@@ -222,8 +229,14 @@ const server = net.createServer((socket) => {
           // メッセージを処理してレスポンスを取得（クライアントIDを渡す）
           const responseData = await processMessage(clientId, message);
 
-          // レスポンスをJSON形式でクライアントに送信
-          socket.write(`${JSON.stringify(responseData)}\n`);
+          // レスポンスをXML形式でクライアントに送信
+          const xmlData = xmlBuilder.build({
+            response: {
+              model: responseData.model,
+              content: responseData.content,
+            },
+          });
+          socket.write(`${xmlData}\n`);
         }
       }
     }
