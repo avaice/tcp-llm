@@ -220,9 +220,11 @@ const server = net.createServer((socket) => {
                 type: "command",
                 command: "models",
                 current_model: currentModel,
-                available_models: AVAILABLE_MODELS,
+                available_models: {
+                  model: AVAILABLE_MODELS,
+                },
                 message:
-                  "モデルを変更するには '/model モデル名' と入力してください。",
+                  "モデルを変更するには /model モデル名 と入力してください。",
               },
             });
             socket.write(`${xmlData}\n`);
