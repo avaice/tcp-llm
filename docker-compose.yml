@@ -14,3 +14,7 @@ services:
     volumes:
       - ./src:/app/src  # ソースコードの変更を反映
     restart: unless-stopped
+    dns: 
+      - 8.8.8.8
+      - 8.8.4.4
+
