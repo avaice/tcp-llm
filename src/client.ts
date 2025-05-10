@@ -84,15 +84,51 @@ client.on("data", (data) => {
       const parsedData = xmlParser.parse(responseText);
 
       if (parsedData.response) {
-        const responseData = {
-          model: parsedData.response.model,
-          content: parsedData.response.content,
-        };
+        // コマンドレスポンスの場合
+        if (parsedData.response.type === "command") {
+          console.log("\n=== コマンド実行結果 ===");
 
-        // モデル情報とレスポンス内容を表示
-        console.log("\n=== AIからの応答 ===");
-        console.log(`[モデル: ${responseData.model}]`);
-        console.log(responseData.content);
+          // コマンドタイプに応じた表示
+          switch (parsedData.response.command) {
+            case "clear":
+              console.log(parsedData.response.message);
+              break;
+
+            case "models":
+              console.log(`現在のモデル: ${parsedData.response.current_model}`);
+              console.log(
+                `利用可能なモデル: ${parsedData.response.available_models.join(
+                  ", "
+                )}`
+              );
+              console.log(parsedData.response.message);
+              break;
+
+            case "model_change":
+              console.log(parsedData.response.message);
+              break;
+
+            default:
+              console.log(JSON.stringify(parsedData.response, null, 2));
+          }
+        }
+        // AIレスポンスの場合
+        else if (parsedData.response.model && parsedData.response.content) {
+          const responseData = {
+            model: parsedData.response.model,
+            content: parsedData.response.content,
+          };
+
+          // モデル情報とレスポンス内容を表示
+          console.log("\n=== AIからの応答 ===");
+          console.log(`[モデル: ${responseData.model}]`);
+          console.log(responseData.content);
+        }
+        // その他のXMLレスポンス
+        else {
+          console.log("\n=== サーバーからの応答 ===");
+          console.log(JSON.stringify(parsedData.response, null, 2));
+        }
       } else {
         // 解析できたがresponseプロパティがない場合
         console.log("\n=== サーバーからの応答 ===");

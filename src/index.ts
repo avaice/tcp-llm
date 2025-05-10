@@ -197,32 +197,62 @@ const server = net.createServer((socket) => {
             // 会話履歴をクリア
             clearConversationHistory(clientId);
             initializeConversationHistory(clientId);
-            socket.write("会話履歴をクリアしました。\n");
+
+            // XMLレスポンスを送信
+            const xmlData = xmlBuilder.build({
+              response: {
+                type: "command",
+                command: "clear",
+                message: "会話履歴をクリアしました。",
+              },
+            });
+            socket.write(`${xmlData}\n`);
             continue;
           }
 
           // モデル一覧表示コマンド
           if (trimmedMessage === "/models") {
             const currentModel = getClientModel(clientId);
-            socket.write(`現在のモデル: ${currentModel}\n`);
-            socket.write(`利用可能なモデル: ${getAvailableModels()}\n`);
-            socket.write(
-              "モデルを変更するには '/model モデル名' と入力してください。\n"
-            );
+
+            // XMLレスポンスを送信
+            const xmlData = xmlBuilder.build({
+              response: {
+                type: "command",
+                command: "models",
+                current_model: currentModel,
+                available_models: AVAILABLE_MODELS,
+                message:
+                  "モデルを変更するには '/model モデル名' と入力してください。",
+              },
+            });
+            socket.write(`${xmlData}\n`);
             continue;
           }
 
           // モデル変更コマンド
           if (trimmedMessage.startsWith("/model ")) {
             const modelName = trimmedMessage.substring(7).trim();
+            let success = false;
+            let message = "";
+
             if (setClientModel(clientId, modelName)) {
-              socket.write(`モデルを '${modelName}' に変更しました。\n`);
+              success = true;
+              message = `モデルを '${modelName}' に変更しました。`;
             } else {
-              socket.write(
-                `エラー: '${modelName}' は利用できないモデルです。\n`
-              );
-              socket.write(`利用可能なモデル: ${getAvailableModels()}\n`);
+              message = `エラー: '${modelName}' は利用できないモデルです。利用可能なモデル: ${getAvailableModels()}`;
             }
+
+            // XMLレスポンスを送信
+            const xmlData = xmlBuilder.build({
+              response: {
+                type: "command",
+                command: "model_change",
+                success: success,
+                model: modelName,
+                message: message,
+              },
+            });
+            socket.write(`${xmlData}\n`);
             continue;
           }
 
