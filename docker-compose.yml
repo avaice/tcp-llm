@@ -1,13 +1,15 @@
+version: '3'
+
 services:
   tcp-llm-server:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:${PORT:-3000}"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - PORT=3000
+      - PORT=${PORT:-3000}
       - HOST=0.0.0.0  # コンテナ内では0.0.0.0にバインドして外部からアクセス可能にする
     volumes:
       - ./src:/app/src  # ソースコードの変更を反映
